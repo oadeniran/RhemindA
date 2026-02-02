@@ -1,0 +1,174 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: white;
+  padding: 1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow);
+}
+
+.textArea {
+  width: 100%;
+  border: none;
+  resize: none;
+  font-size: 1rem;
+  font-family: inherit;
+  outline: none;
+  min-height: 80px;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--border-color);
+  padding-top: 0.75rem;
+}
+
+.voiceBtn {
+  background: var(--light-blue);
+  color: var(--primary-blue);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.voiceBtn.recording {
+  background: var(--danger);
+  color: white;
+  animation: pulse 1.5s infinite;
+}
+
+.submitBtn {
+  background: var(--primary-blue);
+  color: white;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.audioPreview {
+  width: 100%;
+  margin-top: 0.5rem;
+  border-radius: var(--radius);
+}
+
+.previewActions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  justify-content: flex-end;
+}
+
+.discardBtn {
+  background: white;
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.sectionTitle {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 0.5rem;
+}
+
+.emptyState {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 2rem;
+  font-size: 0.95rem;
+  background-color: rgba(0,0,0,0.02);
+  border-radius: var(--radius);
+  border: 1px dashed var(--border-color);
+  margin-top: 1rem;
+}
+
+.modeSwitcher {
+  display: flex;
+  background: var(--bg-color);
+  padding: 4px;
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+}
+
+.modeTab {
+  flex: 1;
+  padding: 8px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.modeTab.active {
+  background: white;
+  color: var(--primary-blue);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.manualForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-color);
+  font-size: 1rem;
+  font-family: inherit;
+  outline: none;
+}
+
+.input:focus {
+  border-color: var(--primary-blue);
+  background: white;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.6; }
+  100% { opacity: 1; }
+}

@@ -1,0 +1,22 @@
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--text-main);
+}
+
+.emptyState {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 2rem;
+  font-size: 0.95rem;
+  background-color: rgba(0,0,0,0.02);
+  border-radius: var(--radius);
+  border: 1px dashed var(--border-color);
+  margin-top: 1rem;
+}
