@@ -5,7 +5,14 @@ const getEnv = (key: string, fallback?: string): string => {
   return fallback || "";
 };
 
+export const LIMITS = {
+  FREE_TOTAL: 3,
+  FREE_VOICE: 1,
+  FREE_TEXT: 1,
+}
+
 const rawUrl = getEnv("NEXT_PUBLIC_API_URL", process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000");
 
 // Safety: Remove trailing slash
 export const API_URL = rawUrl.replace(/\/$/, "");
+export const API_KEY = getEnv("NEXT_PUBLIC_API_KEY", process.env.NEXT_PUBLIC_API_KEY || "");

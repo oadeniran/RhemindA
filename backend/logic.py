@@ -16,11 +16,11 @@ async def process_reminder(
     user_id: str,
     text: str = None, 
     audio_file: UploadFile = None,
-    # New Manual Fields
     manual_title: str = None,
     manual_remind_at: str = None,
     manual_rule: str = None,
-    manual_extra_info: str = None
+    manual_extra_info: str = None,
+    creation_mode: str = "manual"
 ):
     collection = db_instance.get_collection("reminders")
     new_reminder = {}
@@ -40,8 +40,7 @@ async def process_reminder(
             "recurring_rule": manual_rule if manual_rule and manual_rule != "none" else None,
             "extra_info": manual_extra_info,
             "status": "pending",
-            "created_at": datetime.now(),
-            "user_id": user_id
+            "created_at": datetime.now()
         }
 
     # --- PATH B: AI Extraction (Voice/Text) ---
@@ -66,13 +65,14 @@ async def process_reminder(
                 "recurring_rule": parsed_data.get("recurring_rule"),
                 "extra_info": parsed_data.get("extra_info"),
                 "status": "pending",
-                "created_at": datetime.now(),
-                "user_id": user_id
+                "created_at": datetime.now()
             }
         except Exception as e:
             print(f"AI Error: {e}")
             raise HTTPException(status_code=500, detail="AI Processing Failed")
-
+    
+    new_reminder["user_id"] = user_id
+    new_reminder['creation_mode'] = creation_mode
     # --- Final Step: Save to DB ---
     result = await collection.insert_one(new_reminder)
     

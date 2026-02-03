@@ -6,11 +6,16 @@ import styles from "./home.module.css";
 import { API_URL } from "@/lib/config";
 import { getUserId } from "@/lib/user";
 import { Mic, Send, Square, Trash2, Loader2, Sparkles, Edit3 } from "lucide-react";
+import { LIMITS } from "@/lib/config";
+import { checkSubscription, purchasePro } from "@/lib/purchases";
+
 
 export default function Home() {
   const [reminders, setReminders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [usage, setUsage] = useState({ total: 0, voice: 0, text: 0 });
+  const [isPro, setIsPro] = useState(false);
   
   // Mode State: 'ai' (Voice/Text) or 'manual' (Form)
   const [mode, setMode] = useState<'ai' | 'manual'>('ai');
@@ -29,15 +34,50 @@ export default function Home() {
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
 
-  const fetchRecent = async () => {
-    setIsLoading(true);
+  const checkLimit = (mode:string): boolean => {
+      if (isPro) return true;
+  
+      // Global Limit
+      if (usage.total >= LIMITS.FREE_TOTAL) {
+        alert("Free Limit Reached (3 Reminders). Upgrade in Profile to add more!");
+        return false;
+      }
+  
+      // Mode Specific Limits
+      if (mode === 'voice' && usage.voice >= LIMITS.FREE_VOICE) {
+        alert("You've used your free Voice Reminder. Upgrade to unlock unlimited voice!");
+        return false;
+      }
+      if (mode === 'text' && usage.text >= LIMITS.FREE_TEXT) {
+        alert("You've used your free AI Text Reminder. Use Manual form or Upgrade!");
+        return false;
+      }
+      
+      return true;
+    };
+
+  const fetchUserData = async () => {
     const userId = getUserId();
-    const res = await fetch(`${API_URL}/reminders/home/${userId}`);
-    if (res.ok) setReminders(await res.json());
+    const proStatus = await checkSubscription();
+    setIsPro(proStatus);
+
+    // Fetch history to calculate usage (Simple client-side calculation for Hackathon)
+    const res = await fetch(`${API_URL}/reminders/history/${userId}`);
+    if (res.ok) {
+      const allReminders = await res.json();
+      
+      const stats = {
+        total: allReminders.length,
+        voice: allReminders.filter((r: any) => r.creation_mode === "voice").length,
+        text: allReminders.filter((r: any) => r.creation_mode === "ai_text").length,
+      };
+      setUsage(stats);
+      setReminders(allReminders.slice(0, 2)); // Just keep recent for home
+    }
     setIsLoading(false);
   };
 
-  useEffect(() => { fetchRecent(); }, []);
+  useEffect(() => { fetchUserData(); }, []);
 
   // Audio Cleanup
   useEffect(() => {
@@ -74,6 +114,13 @@ export default function Home() {
 
   // --- Submit Logic ---
   const handleSubmit = async () => {
+    let currentMode = 'manual';
+    if (mode === 'ai') {
+        currentMode = audioBlob ? 'voice' : 'ai_text';
+    }
+    console.log("Current Mode:", currentMode);
+    if (!checkLimit(currentMode)) return;
+    
     setIsSubmitting(true);
     const userId = getUserId();
     const formData = new FormData();
@@ -97,6 +144,7 @@ export default function Home() {
       if (audioBlob) formData.append("file", audioBlob, "voice.webm");
       else formData.append("text", text);
     }
+    formData.append("mode", currentMode);
 
     try {
       await fetch(`${API_URL}/reminders/create`, { method: "POST", body: formData });
@@ -108,7 +156,7 @@ export default function Home() {
       setDate("");
       setRule("none");
       setMode("ai"); // Switch back to default
-      fetchRecent();
+      fetchUserData();
     } catch (e) {
       console.error(e);
     } finally {

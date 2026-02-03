@@ -19,6 +19,8 @@ RecurringRuleType = Literal[
     "yearly"
 ]
 
+CreationMode = Literal["voice", "ai_text", "manual"]
+
 class ReminderBase(BaseModel):
     user_id: str
     title: str
@@ -26,6 +28,7 @@ class ReminderBase(BaseModel):
     remind_at: datetime
     recurring_rule: Optional[RecurringRuleType] = None
     status: str = "pending"  # pending, completed, snoozed
+    creation_mode: CreationMode = "manual"
 
 class ReminderCreate(BaseModel):
     """Used when receiving manual input (optional)"""
