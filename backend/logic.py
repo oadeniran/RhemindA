@@ -20,7 +20,8 @@ async def process_reminder(
     manual_remind_at: str = None,
     manual_rule: str = None,
     manual_extra_info: str = None,
-    creation_mode: str = "manual"
+    creation_mode: str = "manual",
+    local_time: str = None
 ):
     collection = db_instance.get_collection("reminders")
     new_reminder = {}
@@ -45,7 +46,7 @@ async def process_reminder(
 
     # --- PATH B: AI Extraction (Voice/Text) ---
     else:
-        prompt = get_reminder_extraction_prompt()
+        prompt = get_reminder_extraction_prompt(local_time)
         try:
             if audio_file:
                 audio_bytes = await audio_file.read()

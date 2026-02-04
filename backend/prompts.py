@@ -3,8 +3,8 @@ from datetime import datetime
 from models import RecurringRuleType
 
 
-def get_reminder_extraction_prompt() -> str:
-    current_time_iso = datetime.now().isoformat()
+def get_reminder_extraction_prompt(current_time: str = None) -> str:
+    current_time_iso = current_time or datetime.now().isoformat()
     possible_rules = ', '.join(f'"{rule}"' for rule in RecurringRuleType.__args__ if rule != "custom")
 
     return f"""

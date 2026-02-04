@@ -8,8 +8,7 @@ import { getUserId } from "@/lib/user";
 import { Mic, Send, Square, Trash2, Loader2, Sparkles, Edit3 } from "lucide-react";
 import { LIMITS } from "@/lib/config";
 import { checkSubscription } from "@/lib/purchases";
-import { LocalNotifications } from '@capacitor/local-notifications';
-import { useRouter } from "next/navigation";
+import { scheduleNotification } from "@/lib/notifications";
 
 
 export default function Home() {
@@ -35,6 +34,13 @@ export default function Home() {
   const [extraInfo, setExtraInfo] = useState("");
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+
+  const getLocalISOString = () => {
+    const now = new Date();
+    const offsetMs = now.getTimezoneOffset() * 60000;
+    const localTime = new Date(now.getTime() - offsetMs);
+    return localTime.toISOString().slice(0, 19);
+  };
 
   const checkLimit = (mode:string): boolean => {
       if (isPro) return true;
@@ -77,76 +83,6 @@ export default function Home() {
       setReminders(allReminders.slice(0, 2)); // Just keep recent for home
     }
     setIsLoading(false);
-  };
-
-  const router = useRouter();
-
-  // 1. Register the "Action Type" (Run this once on mount)
-  useEffect(() => {
-    LocalNotifications.registerActionTypes({
-        types: [
-            {
-                id: 'REMINDER_ACTIONS',
-                actions: [
-                    { id: 'snooze', title: 'Snooze 10m', foreground: false },
-                    { id: 'complete', title: 'Mark Done', foreground: false }
-                ]
-            }
-        ]
-    });
-
-    // 2. Listen for button clicks
-    LocalNotifications.addListener('localNotificationActionPerformed', async (notification) => {
-        const actionId = notification.actionId;
-        const reminderId = notification.notification.extra?.reminderId;
-
-        if (!reminderId) return;
-
-        if (actionId === 'complete') {
-            // Call your API to complete
-            await fetch(`${API_URL}/reminders/${reminderId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: 'completed' })
-            });
-        } else if (actionId === 'snooze') {
-            // Calculate 10 mins from now
-            const snoozeTime = new Date(Date.now() + 10 * 60000).toISOString();
-            await fetch(`${API_URL}/reminders/${reminderId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: 'snoozed', remind_at: snoozeTime })
-            });
-        }
-        // Refresh UI
-        window.location.reload(); 
-    });
-  }, []);
-
-  const scheduleNotification = async (reminder: any) => {
-      // Request permission on first run
-      await LocalNotifications.requestPermissions();
-
-      const remindDate = new Date(reminder.remind_at);
-      
-      // Don't schedule if it's in the past
-      if (remindDate.getTime() < Date.now()) return;
-
-      await LocalNotifications.schedule({
-          notifications: [
-              {
-                  title: "Rheminda",
-                  body: reminder.title,
-                  id: Math.floor(Math.random() * 100000), // Random ID
-                  schedule: { at: remindDate },
-                  sound: undefined, // Uses default system sound
-                  attachments: undefined,
-                  actionTypeId: 'Reminder_ACTIONS',
-                  extra: { reminderId: reminder._id }
-              }
-          ]
-      });
-      console.log(`Scheduled: ${reminder.title} at ${remindDate}`);
   };
 
   useEffect(() => { fetchUserData(); }, []);
@@ -217,6 +153,7 @@ export default function Home() {
       else formData.append("text", text);
     }
     formData.append("mode", currentMode);
+    formData.append("local_time", getLocalISOString());
 
     try {
       const res = await fetch(`${API_URL}/reminders/create`, { method: "POST", body: formData });

@@ -37,7 +37,8 @@ async def create_reminder(
     extra_info: Optional[str] = Form(None),
     # Required
     user_id: str = Form(...),
-    mode: str = Form("manual") 
+    mode: str = Form("manual"), 
+    local_time: Optional[str] = Form(None)
 ):
     print(f"Received create_reminder request with mode: {mode}")
     return await logic.process_reminder(
@@ -48,7 +49,8 @@ async def create_reminder(
         manual_remind_at=remind_at,
         manual_rule=recurring_rule,
         manual_extra_info=extra_info,
-        creation_mode=mode
+        creation_mode=mode,
+        local_time=local_time
     )
 
 @app.get("/reminders/home/{user_id}", response_model=List[ReminderResponse])

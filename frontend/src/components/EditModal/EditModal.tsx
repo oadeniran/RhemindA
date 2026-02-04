@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styles from './EditModal.module.css';
-import { X } from 'lucide-react';
+import { X, Check, Clock, Save } from 'lucide-react';
 
 export interface ReminderData {
   _id: string;
@@ -16,9 +16,11 @@ interface EditModalProps {
   reminder: ReminderData;
   onClose: () => void;
   onSave: (id: string, data: Partial<ReminderData>) => void;
+  onComplete: (id: string) => void;
+  onSnooze: (id: string) => void;
 }
 
-export default function EditModal({ reminder, onClose, onSave }: EditModalProps) {
+export default function EditModal({ reminder, onClose, onSave, onComplete, onSnooze }: EditModalProps) {
   // Safe default for date slicing
   const initialDate = reminder.remind_at && reminder.remind_at.length >= 16 
     ? reminder.remind_at.slice(0, 16) 
@@ -26,7 +28,6 @@ export default function EditModal({ reminder, onClose, onSave }: EditModalProps)
 
   const [title, setTitle] = useState(reminder.title);
   const [date, setDate] = useState(initialDate);
-  // Default to "none" if null/undefined
   const [rule, setRule] = useState(reminder.recurring_rule || "none");
   const [extraInfo, setExtraInfo] = useState(reminder.extra_info || "");
 
@@ -147,7 +148,35 @@ export default function EditModal({ reminder, onClose, onSave }: EditModalProps)
             </div>
         </div>
 
-        <button onClick={handleSave} className={styles.saveBtn}>Save Changes</button>
+        <div className={styles.actions}>
+           {/* Primary Save Button */}
+           <button onClick={handleSave} className={styles.saveBtn}>
+             <Save size={16} /> Save Changes
+           </button>
+           
+           <div className={styles.quickActions}>
+             {/* Snooze Button */}
+             <button 
+               onClick={() => { onSnooze(reminder._id); onClose(); }} 
+               className={styles.actionBtn}
+               style={{ background: '#f59e0b', color: 'white' }}
+             >
+               <Clock size={16} /> Snooze 10m
+             </button>
+
+             {/* Complete Button (Only show if not done) */}
+             {reminder.status !== 'completed' && (
+               <button 
+                 onClick={() => { onComplete(reminder._id); onClose(); }} 
+                 className={styles.actionBtn}
+                 style={{ background: '#16a34a', color: 'white' }}
+               >
+                 <Check size={16} /> Done
+               </button>
+             )}
+           </div>
+        </div>
+
       </div>
     </div>
   );
