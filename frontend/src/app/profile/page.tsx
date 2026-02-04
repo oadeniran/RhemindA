@@ -23,9 +23,17 @@ export default function Profile() {
 
   const handlePurchase = async () => {
     setPurchasing(true);
-    const success = await purchasePro();
-    if (success) setIsPro(true);
-    setPurchasing(false);
+    try {
+        const success = await purchasePro();
+        if (success) {
+            setIsPro(true);
+            alert("Welcome to Pro! 🌟"); // Visual feedback
+        }
+    } catch (e) {
+        console.error(e);
+    } finally {
+        setPurchasing(false);
+    }
   };
 
   return (

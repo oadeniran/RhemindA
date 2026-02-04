@@ -6,10 +6,12 @@ import styles from "./history.module.css";
 import { API_URL } from "@/lib/config";
 import { getUserId } from "@/lib/user";
 import { Inbox, Loader2 } from "lucide-react";
+import EditModal, { ReminderData } from "@/components/EditModal/EditModal";
 
 export default function HistoryPage() {
   const [history, setHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [editingReminder, setEditingReminder] = useState<ReminderData | null>(null);
 
   const fetchHistory = async () => {
     setIsLoading(true);
@@ -17,6 +19,20 @@ export default function HistoryPage() {
     const res = await fetch(`${API_URL}/reminders/history/${userId}`);
     if (res.ok) setHistory(await res.json());
     setIsLoading(false);
+  };
+
+  const saveEdit = async (id: string, data: any) => {
+    try {
+        await fetch(`${API_URL}/reminders/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+        // Refresh list
+        fetchHistory();
+    } catch (e) {
+        console.error("Edit failed", e);
+    }
   };
 
   useEffect(() => {
@@ -56,6 +72,7 @@ export default function HistoryPage() {
             showActions={true}
             onComplete={handleComplete}
             onDelete={handleDelete}
+            onEdit={setEditingReminder}
           />
         ))}
 
@@ -68,6 +85,16 @@ export default function HistoryPage() {
             </p>
           </div>
         )}
+
+        {editingReminder && (
+           <EditModal
+             key={editingReminder._id} 
+             reminder={editingReminder} 
+             onClose={() => setEditingReminder(null)} 
+             onSave={saveEdit} 
+           />
+        )}
+        
       </div>
     </AppLayout>
   );

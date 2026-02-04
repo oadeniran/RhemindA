@@ -1,12 +1,22 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, History, Info, User } from "lucide-react";
 import styles from "./Layout.module.css";
+import { initPurchases } from "@/lib/purchases";
+import { getUserId } from "@/lib/user";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+
+  useEffect(() => {
+    const setup = async () => {
+      const userId = getUserId();
+      await initPurchases(userId);
+    };
+    setup();
+  }, []);
 
   const isActive = (path: string) => pathname === path ? styles.active : "";
 

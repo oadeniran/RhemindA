@@ -33,13 +33,17 @@ export const purchasePro = async (): Promise<boolean> => {
     if (offerings.current && offerings.current.availablePackages.length > 0) {
       const packageToBuy = offerings.current.availablePackages[0];
       
-      const { customerInfo } = await Purchases.purchasePackage({ aPackage: packageToBuy });
+      await Purchases.purchasePackage({ aPackage: packageToBuy });
       
+      const { customerInfo } = await Purchases.getCustomerInfo();
+      
+      console.log("Active Entitlements:", JSON.stringify(customerInfo.entitlements.active));
+
       return typeof customerInfo.entitlements.active["pro"] !== "undefined";
     }
   } catch (e: any) {
     if (!e.userCancelled) {
-      alert("Purchase failed: " + e.message);
+      alert("Purchase Error: " + e.message);
     }
   }
   return false;

@@ -64,6 +64,7 @@ async def process_reminder(
                 "remind_at": datetime.fromisoformat(parsed_data.get("remind_at")),
                 "recurring_rule": parsed_data.get("recurring_rule"),
                 "extra_info": parsed_data.get("extra_info"),
+                "recurrence_queue": parsed_data.get("recurrence_queue", []),
                 "status": "pending",
                 "created_at": datetime.now()
             }
@@ -115,7 +116,27 @@ async def update_reminder_status(reminder_id: str, updates: dict):
         original_reminder = await collection.find_one({"_id": ObjectId(reminder_id)})
         
         rule = original_reminder.get("recurring_rule")
-        if rule and rule != "none": # "none" check for safety
+        if rule and rule == "custom":
+            queue = original_reminder.get("recurrence_queue", [])
+            
+            if queue and len(queue) > 0:
+                # 1. Pop the next date
+                next_date_str = queue[0]
+                remaining_queue = queue[1:]
+                
+                # 2. Create the Clone
+                new_reminder = {
+                    "user_id": original_reminder["user_id"],
+                    "title": original_reminder["title"],
+                    "remind_at": datetime.fromisoformat(next_date_str),
+                    "recurring_rule": "custom",
+                    "recurrence_queue": remaining_queue, # Pass the baton
+                    "extra_info": original_reminder.get("extra_info"),
+                    "status": "pending",
+                    "created_at": datetime.now()
+                }
+                await collection.insert_one(new_reminder)
+        elif rule and rule != "none": # "none" check for safety
             
             # Calculate next date based on the OLD scheduled date (not today's date)
             # This prevents drift if I complete a daily task late

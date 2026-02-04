@@ -1,7 +1,7 @@
 "use client";
 import AppLayout from "@/components/Layout/AppLayout";
 import styles from "./about.module.css";
-import { CheckCircle, Code, Smartphone, Zap } from "lucide-react";
+import { CheckCircle, Code, Smartphone, Watch, Zap } from "lucide-react";
 
 export default function AboutPage() {
   return (
@@ -33,6 +33,10 @@ export default function AboutPage() {
             <li className={styles.listItem}>
               <Zap size={20} className={styles.icon} />
               <span><strong>AI Voice Parsing:</strong> Speak naturally, we handle the dates.</span>
+            </li>
+            <li className={styles.listItem}>
+              <Watch size={25} className={styles.icon} />
+              <span><strong>Powerful Recurrence:</strong> AI-driven scheduling for complex patterns like "first 2 days then skip 1".</span>
             </li>
             <li className={styles.listItem}>
               <Smartphone size={20} className={styles.icon} />

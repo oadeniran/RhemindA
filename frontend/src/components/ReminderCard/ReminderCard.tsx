@@ -6,10 +6,11 @@ interface Props {
   data: any;
   onComplete?: (id: string) => void;
   onDelete?: (id: string) => void;
+  onEdit?: (reminder: any) => void;
   showActions?: boolean;
 }
 
-export default function ReminderCard({ data, onComplete, onDelete, showActions = false }: Props) {
+export default function ReminderCard({ data, onComplete, onDelete, onEdit, showActions = false }: Props) {
   const [isExpanded, setIsExpanded] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -80,6 +81,14 @@ export default function ReminderCard({ data, onComplete, onDelete, showActions =
               onClick={(e) => { e.stopPropagation(); onComplete(data._id); }}
             >
               Done
+            </button>
+          )}
+          {onEdit && (
+            <button 
+              className={`${styles.btn} ${styles.btnEdit}`}
+              onClick={(e) => { e.stopPropagation(); onEdit(data); }}
+            >
+              Edit
             </button>
           )}
         </div>
